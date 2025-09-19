@@ -1,13 +1,10 @@
-# Start from a Java 17 base image
-FROM eclipse-temurin:17-jdk-alpine
-
-# Set working directory
-WORKDIR /app
-
 # Copy Maven wrapper and pom.xml first (for caching)
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
+
+# Make the Maven wrapper executable (this fixes the permission denied error)
+RUN chmod +x mvnw
 
 # Download dependencies
 RUN ./mvnw dependency:go-offline
