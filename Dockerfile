@@ -1,27 +1,28 @@
-# Use Java 21
+# Use Java 21 base image
 FROM eclipse-temurin:21-jdk-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml first (for caching)
+# Copy Maven wrapper and pom.xml first (for caching dependencies)
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
-# Make mvnw executable
+# Make Maven wrapper executable
 RUN chmod +x mvnw
 
-# Download dependencies
+# Download dependencies offline (caching step)
 RUN ./mvnw dependency:go-offline
 
-# Copy the rest of the project
+# Copy the source code
 COPY src ./src
 
-# Package the app
+# Build the application (skip tests to speed up)
 RUN ./mvnw clean package -DskipTests
 
 # Expose the port Spring Boot runs on
 EXPOSE 8080
 
-# Run the jar
-CMD ["java", "-jar", "target/springbootbackendlive-0.0.1-SNAPSHOT.jar"]
+# Run the JAR dynamically (no hardcoded version)
+CMD java -jar target/*.jar
